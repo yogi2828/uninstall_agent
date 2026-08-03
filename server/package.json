@@ -1,0 +1,14 @@
+{
+  "name": "uninstall-management-server",
+  "version": "1.0.0",
+  "description": "Remote Application Uninstallation Management API and Web Dashboard",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "cors": "^2.8.5"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "sysclean-client-agent",
+  "version": "1.0.0",
+  "description": "Desktop Helper Agent for Remote App Uninstallation & Trace Cleaning",
+  "main": "agent.js",
+  "scripts": {
+    "start": "node agent.js",
+    "register": "node register-protocol.js"
+  }
+}

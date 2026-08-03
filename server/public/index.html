@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SysClean Enterprise | Automated Remote App Uninstaller & Trace Cleaner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at 15% 15%, #1e1b4b 0%, #0f172a 45%, #020617 100%);
+      --panel-bg: rgba(15, 23, 42, 0.75);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --panel-border-hover: rgba(56, 189, 248, 0.3);
+      --accent-blue: #38bdf8;
+      --accent-indigo: #6366f1;
+      --accent-purple: #a855f7;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 2rem;
+      line-height: 1.5;
+    }
+
+    /* Container */
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--panel-border);
+    }
+    .logo-group { display: flex; align-items: center; gap: 1.2rem; }
+    .logo-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, #0284c7 0%, #6366f1 50%, #9333ea 100%);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.4rem;
+      color: white;
+      box-shadow: 0 0 25px rgba(99, 102, 241, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .title-group h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, #ffffff 0%, #e2e8f0 50%, #94a3b8 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .title-group p { font-size: 0.85rem; color: var(--text-muted); }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--accent-emerald);
+      padding: 8px 18px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      background: var(--accent-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--accent-emerald);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* Key Statistics Metrics Bar */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 900px) { .metrics-grid { grid-template-columns: repeat(2, 1fr); } }
+    
+    .metric-card {
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+    }
+    .metric-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    .metric-val { font-size: 1.4rem; font-weight: 700; color: #f8fafc; }
+    .metric-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+
+    /* Security Callout Banner */
+    .callout {
+      background: rgba(56, 189, 248, 0.06);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-left: 4px solid var(--accent-blue);
+      padding: 1.1rem 1.4rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .callout strong { color: var(--accent-blue); }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1.2fr;
+      gap: 2rem;
+    }
+    @media (max-width: 1100px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+    /* Glass Cards */
+    .card {
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      padding: 1.8rem;
+      box-shadow: var(--glass-shadow);
+      transition: border-color 0.3s;
+    }
+    .card:hover { border-color: rgba(255, 255, 255, 0.12); }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      color: #f1f5f9;
+    }
+    .card-title svg { color: var(--accent-blue); }
+
+    /* Form Inputs */
+    .form-group { margin-bottom: 1.3rem; }
+    .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.4rem; }
+    .form-select, .form-input {
+      width: 100%;
+      padding: 0.8rem 1.1rem;
+      background: rgba(10, 15, 30, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .form-select:focus, .form-input:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+
+    /* Cleanup Depth Selector */
+    .depth-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-top: 0.4rem; }
+    .depth-card {
+      background: rgba(10, 15, 30, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 0.9rem 0.6rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .depth-card:hover { border-color: var(--accent-blue); transform: translateY(-2px); }
+    .depth-card.active {
+      background: rgba(56, 189, 248, 0.12);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+    }
+    .depth-title { font-weight: 700; font-size: 0.85rem; color: #f8fafc; }
+    .depth-desc { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+    /* Action Button */
+    .btn-primary {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #0284c7 0%, #4f46e5 50%, #7c3aed 100%);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 700;
+      font-size: 0.98rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.5);
+      margin-top: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.7);
+      filter: brightness(1.1);
+    }
+
+    .btn-secondary {
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-main);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.16); }
+
+    /* Installed Apps Cards */
+    .search-input { margin-bottom: 1rem; }
+    .app-item {
+      padding: 0.9rem 1.1rem;
+      background: rgba(10, 15, 30, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      margin-bottom: 0.6rem;
+      transition: border-color 0.2s;
+    }
+    .app-item:hover { border-color: rgba(99, 102, 241, 0.4); }
+    .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem; }
+    .app-title { font-size: 0.92rem; font-weight: 700; color: #f8fafc; }
+    .app-size { font-size: 0.75rem; color: var(--accent-purple); font-weight: 600; background: rgba(168, 85, 247, 0.1); padding: 2px 8px; border-radius: 6px; }
+    .app-vendor { font-size: 0.78rem; color: var(--text-muted); }
+    .app-paths { font-size: 0.72rem; color: var(--accent-blue); font-family: 'JetBrains Mono', monospace; margin-top: 0.4rem; word-break: break-all; }
+
+    /* Job Card & Real-time Logs Terminal */
+    .job-card {
+      background: rgba(10, 15, 30, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 1.3rem;
+      margin-bottom: 1.2rem;
+    }
+    .job-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+    .job-tag { padding: 4px 12px; border-radius: 9999px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .tag-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .tag-triggered { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.4); }
+    .tag-completed { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.4); }
+    
+    /* Progress Bar */
+    .progress-bar-bg { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 999px; margin: 0.8rem 0; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-emerald)); width: 0%; transition: width 0.5s ease; }
+
+    .link-box {
+      background: #050811;
+      border: 1px dashed rgba(56, 189, 248, 0.3);
+      padding: 0.9rem;
+      border-radius: 10px;
+      margin: 0.8rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .link-text { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent-blue); word-break: break-all; }
+
+    .log-terminal {
+      background: #050811;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 0.9rem;
+      max-height: 240px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+    }
+    .log-line { margin-bottom: 0.4rem; line-height: 1.45; color: #cbd5e1; }
+    .log-time { color: #64748b; }
+    .log-step { color: var(--accent-purple); font-weight: 600; }
+    .log-purge { color: var(--accent-rose); font-style: italic; }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #1e293b;
+      border: 1px solid var(--accent-emerald);
+      color: #f8fafc;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      transform: translateY(150%);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 1000;
+    }
+    .toast.show { transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="logo-group">
+        <div class="logo-icon">SC</div>
+        <div class="title-group">
+          <h1>SysClean Enterprise Management</h1>
+          <p>Automated Remote Application Uninstallation & Deep Trace Purge Engine</p>
+        </div>
+      </div>
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        SysClean API Server Active
+      </div>
+    </div>
+
+    <!-- Metrics Bar -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(56, 189, 248, 0.15); color: var(--accent-blue);">🖥️</div>
+        <div>
+          <div class="metric-val" id="metricDevices">2</div>
+          <div class="metric-label">Managed Host Devices</div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--accent-indigo);">📦</div>
+        <div>
+          <div class="metric-val" id="metricApps">6</div>
+          <div class="metric-label">Monitored Applications</div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald);">⚡</div>
+        <div>
+          <div class="metric-val" id="metricPurges">12</div>
+          <div class="metric-label">Completed Trace Purges</div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(168, 85, 247, 0.15); color: var(--accent-purple);">🛡️</div>
+        <div>
+          <div class="metric-val">100%</div>
+          <div class="metric-label">Token Security Index</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Callout Banner -->
+    <div class="callout">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      <div>
+        <strong>Browser Security & Execution Architecture:</strong> Web browsers operate in isolated sandboxes and cannot silently delete files or run system binaries without local user authorization. Clicking the magic email link invokes the registered <code>sysclean://</code> protocol scheme, validating the single-use JWT token and performing elevated trace cleanup safely.
+      </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+
+      <!-- Left Column: Initiate Request & Inventory Explorer -->
+      <div>
+        <div class="card" style="margin-bottom: 2rem;">
+          <div class="card-title">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Dispatch Remote Auto-Uninstall Request
+          </div>
+
+          <form id="uninstallForm">
+            <div class="form-group">
+              <label class="form-label">Target Managed Device</label>
+              <select class="form-select" id="deviceSelect">
+                <option value="">Loading managed devices...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Target Application to Uninstall</label>
+              <select class="form-select" id="appSelect">
+                <option value="">Select a target device first</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Recipient User Email</label>
+              <input type="email" class="form-input" id="targetEmail" value="executive.user@company.com" placeholder="user@domain.com">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Trace Cleanup Depth Level</label>
+              <div class="depth-grid">
+                <div class="depth-card" data-depth="standard" onclick="selectDepth('standard')">
+                  <div class="depth-title">Standard</div>
+                  <div class="depth-desc">App files only</div>
+                </div>
+                <div class="depth-card active" data-depth="deep" onclick="selectDepth('deep')">
+                  <div class="depth-title">Deep Purge</div>
+                  <div class="depth-desc">AppData & Configs</div>
+                </div>
+                <div class="depth-card" data-depth="forensic" onclick="selectDepth('forensic')">
+                  <div class="depth-title">Forensic</div>
+                  <div class="depth-desc">Registry & Temp</div>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary">
+              🚀 Generate & Dispatch Uninstall Email Link
+            </button>
+          </form>
+        </div>
+
+        <!-- Inventory Explorer -->
+        <div class="card">
+          <div class="card-title">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+            Installed Applications Inventory
+          </div>
+          
+          <input type="text" class="form-input search-input" id="searchApp" placeholder="🔍 Search installed applications or registry keys..." oninput="filterApps()">
+
+          <div id="installedAppsContainer">
+            <p style="color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0;">Select a device to view installed applications.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Job Stream & Log Monitor -->
+      <div>
+        <div class="card">
+          <div class="card-title" style="justify-content: space-between;">
+            <span style="display: flex; align-items: center; gap: 0.7rem;">
+              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Active Uninstall Jobs & Real-Time Logs
+            </span>
+            <button class="btn-secondary" onclick="fetchJobs()">🔄 Refresh</button>
+          </div>
+
+          <div id="jobsContainer">
+            <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 3rem;">
+              No active uninstallation jobs. Dispatch a request to start real-time monitoring.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Alert Component -->
+  <div class="toast" id="toast">
+    <span id="toastIcon">✅</span>
+    <span id="toastMsg">Action completed successfully!</span>
+  </div>
+
+  <script>
+    let devicesData = [];
+    let selectedDepth = 'deep';
+    let currentInstalledApps = [];
+
+    // Show Toast Notification
+    function showToast(msg, icon = '✅') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      document.getElementById('toastIcon').innerText = icon;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    // Select Cleanup Depth Level
+    function selectDepth(depth) {
+      selectedDepth = depth;
+      document.querySelectorAll('.depth-card').forEach(el => {
+        if (el.getAttribute('data-depth') === depth) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      });
+    }
+
+    // Load Managed Devices
+    async function loadDevices() {
+      try {
+        const res = await fetch('/api/devices');
+        const data = await res.json();
+        if (data.success) {
+          devicesData = data.devices;
+          document.getElementById('metricDevices').innerText = devicesData.length;
+          
+          let totalAppCount = 0;
+          devicesData.forEach(d => totalAppCount += d.installedApps.length);
+          document.getElementById('metricApps').innerText = totalAppCount;
+
+          const select = document.getElementById('deviceSelect');
+          select.innerHTML = '<option value="">-- Choose Target Host Device --</option>';
+          devicesData.forEach(d => {
+            select.innerHTML += `<option value="${d.id}">${d.hostname} (${d.os}) - ${d.ip}</option>`;
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch devices', err);
+      }
+    }
+
+    // Filter Applications Search
+    function filterApps() {
+      const query = document.getElementById('searchApp').value.toLowerCase();
+      renderAppList(currentInstalledApps.filter(a => 
+        a.name.toLowerCase().includes(query) || 
+        a.vendor.toLowerCase().includes(query) ||
+        a.registryKey.toLowerCase().includes(query)
+      ));
+    }
+
+    // Render Applications List
+    function renderAppList(apps) {
+      const appsContainer = document.getElementById('installedAppsContainer');
+      if (apps.length === 0) {
+        appsContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0;">No matching applications found.</p>';
+        return;
+      }
+
+      appsContainer.innerHTML = '';
+      apps.forEach(app => {
+        appsContainer.innerHTML += `
+          <div class="app-item">
+            <div class="app-header">
+              <span class="app-title">${app.name} <span style="font-weight: normal; color: var(--text-muted); font-size: 0.8rem;">v${app.version}</span></span>
+              <span class="app-size">${app.sizeMB} MB</span>
+            </div>
+            <div class="app-vendor">Vendor: ${app.vendor}</div>
+            <div class="app-paths">Registry: ${app.registryKey}<br/>Path: ${app.appDataDir}</div>
+          </div>
+        `;
+      });
+    }
+
+    // Handle Device Select Change
+    document.getElementById('deviceSelect').addEventListener('change', function(e) {
+      const devId = e.target.value;
+      const appSelect = document.getElementById('appSelect');
+
+      if (!devId) {
+        appSelect.innerHTML = '<option value="">Select a target device first</option>';
+        currentInstalledApps = [];
+        renderAppList([]);
+        return;
+      }
+
+      const device = devicesData.find(d => d.id === devId);
+      if (device) {
+        appSelect.innerHTML = '<option value="">-- Select Installed Application --</option>';
+        currentInstalledApps = device.installedApps;
+        
+        device.installedApps.forEach(app => {
+          appSelect.innerHTML += `<option value="${app.id}">${app.name} v${app.version} (${app.sizeMB} MB)</option>`;
+        });
+
+        renderAppList(currentInstalledApps);
+      }
+    });
+
+    // Submit Uninstall Form
+    document.getElementById('uninstallForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const deviceId = document.getElementById('deviceSelect').value;
+      const appId = document.getElementById('appSelect').value;
+      const targetEmail = document.getElementById('targetEmail').value;
+
+      if (!deviceId || !appId) {
+        showToast('Please select both a target device and application', '⚠️');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/uninstall/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            deviceId,
+            appId,
+            targetEmail,
+            cleanupDepth: selectedDepth,
+            autoPurgeTraces: true
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          showToast('Uninstall Magic Link generated and sent!');
+          fetchJobs();
+        } else {
+          showToast('Error: ' + data.message, '❌');
+        }
+      } catch (err) {
+        showToast('Failed to dispatch request: ' + err.message, '❌');
+      }
+    });
+
+    // Fetch Jobs & Real-Time Log Streams
+    async function fetchJobs() {
+      try {
+        const res = await fetch('/api/jobs');
+        const data = await res.json();
+        if (!data.success) return;
+
+        const container = document.getElementById('jobsContainer');
+        if (data.jobs.length === 0) {
+          container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 3rem;">No active uninstallation jobs.</p>`;
+          return;
+        }
+
+        container.innerHTML = '';
+        data.jobs.forEach(job => {
+          let tagClass = 'tag-pending';
+          let progressPct = '15%';
+          if (job.status === 'Triggered' || job.status === 'Validated') { tagClass = 'tag-triggered'; progressPct = '45%'; }
+          if (job.status === 'Uninstalling' || job.status === 'Cleaning') { tagClass = 'tag-triggered'; progressPct = '75%'; }
+          if (job.status === 'Completed') { tagClass = 'tag-completed'; progressPct = '100%'; }
+
+          const logsHtml = job.logs.map(log => {
+            const timeStr = new Date(log.timestamp).toLocaleTimeString();
+            let traceDetails = '';
+            if (log.tracesRemoved && log.tracesRemoved.length > 0) {
+              traceDetails = `<div class="log-purge">🔥 Purged: ${log.tracesRemoved.join(', ')}</div>`;
+            }
+            return `<div class="log-line">
+              <span class="log-time">[${timeStr}]</span> 
+              <span class="log-step">[${log.step}]</span> ${log.message}
+              ${traceDetails}
+            </div>`;
+          }).join('');
+
+          container.innerHTML += `
+            <div class="job-card">
+              <div class="job-header">
+                <div>
+                  <strong style="color: #f8fafc; font-size: 1.05rem;">${job.appName}</strong>
+                  <span style="color: var(--text-muted); font-size: 0.82rem; margin-left: 0.5rem;">on ${job.hostname}</span>
+                </div>
+                <span class="job-tag ${tagClass}">${job.status}</span>
+              </div>
+
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: ${progressPct};"></div>
+              </div>
+
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                Target User: <code>${job.targetEmail}</code> | Depth: <strong style="color: var(--accent-blue);">${job.cleanupDepth.toUpperCase()}</strong>
+              </p>
+
+              <div class="link-box">
+                <span class="link-text">${job.webTriggerLink}</span>
+                <a href="${job.webTriggerLink}" target="_blank" class="btn-secondary">
+                  📨 Simulate Link Click
+                </a>
+              </div>
+
+              <div class="log-terminal">
+                ${logsHtml}
+              </div>
+            </div>
+          `;
+        });
+      } catch (err) {
+        console.error('Failed to fetch jobs', err);
+      }
+    }
+
+    // Auto Poll Devices & Jobs every 3 seconds
+    loadDevices();
+    fetchJobs();
+    setInterval(fetchJobs, 3000);
+  </script>
+</body>
+</html>

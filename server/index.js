@@ -251,6 +251,29 @@ app.get('/api/jobs', (req, res) => {
   res.json({ success: true, jobs: uninstallJobs });
 });
 
+// 7. Health Check Endpoint (For Uptime Monitoring Services like UptimeRobot / Cron-Job)
+app.get('/api/health', (req, res) => {
+  res.json({ success: true, status: 'alive', timestamp: new Date().toISOString() });
+});
+
 app.listen(PORT, () => {
   console.log(`[SysClean Management Server] Running on http://localhost:${PORT}`);
+
+  // Automated Self-Ping Keep-Alive Mechanism to prevent Render / free tier cold starts
+  const KEEP_ALIVE_URL = process.env.RENDER_EXTERNAL_URL || process.env.KEEP_ALIVE_URL || `http://localhost:${PORT}`;
+  
+  if (process.env.NODE_ENV === 'production' || process.env.RENDER_EXTERNAL_URL) {
+    console.log(`[Keep-Alive] Initializing self-pinging routine for: ${KEEP_ALIVE_URL}`);
+    const httpLib = KEEP_ALIVE_URL.startsWith('https') ? require('https') : require('http');
+
+    // Ping /api/health every 10 minutes (600,000 ms)
+    setInterval(() => {
+      httpLib.get(`${KEEP_ALIVE_URL}/api/health`, (res) => {
+        console.log(`[Keep-Alive] Ping sent to ${KEEP_ALIVE_URL}/api/health - Status: ${res.statusCode}`);
+      }).on('error', (err) => {
+        console.warn(`[Keep-Alive] Ping failed: ${err.message}`);
+      });
+    }, 10 * 60 * 1000);
+  }
 });
+

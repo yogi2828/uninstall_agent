@@ -134,6 +134,19 @@ You can deploy the **SysClean Management Server & Web Dashboard** for free on mu
 
 Once deployed, Render will provide a free live URL (e.g. `https://sysclean-server.onrender.com`).
 
+#### ⚡ Preventing Free Instance Spin-Down (Cold Starts / 50s Delay)
+
+Free hosting instances on Render spin down after 15 minutes of inactivity. To keep your server awake 24/7 with instant response times:
+
+1. **Automatic Built-in Self-Ping Routine**:
+   The server includes a built-in background keep-alive loop (`setInterval`) targeting `GET /api/health` every 10 minutes when deployed on Render (`RENDER_EXTERNAL_URL`).
+
+2. **Free External Monitoring (Recommended)**:
+   - Sign up for a free account at [UptimeRobot.com](https://uptimerobot.com/) or [cron-job.org](https://cron-job.org/).
+   - Add a new HTTP Monitor targeting your live URL: `https://your-app.onrender.com/api/health`.
+   - Set the monitoring interval to **every 5 to 10 minutes**.
+   - This sends tiny pings to `/api/health`, keeping your server active 24/7 without delays!
+
 ---
 
 ### Option 2: Hosting on Koyeb (Free Tier)

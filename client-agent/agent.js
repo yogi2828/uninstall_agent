@@ -1,17 +1,21 @@
 const http = require('http');
+const https = require('https');
 const TraceCleaner = require('./cleaner');
 
 const SERVER_URL = process.env.SERVER_URL || 'https://uninstall-agent.onrender.com';
 
 /**
- * Helper to make HTTP JSON requests
+ * Helper to make HTTP/HTTPS JSON requests
  */
 function makeRequest(url, method = 'GET', data = null) {
   return new Promise((resolve, reject) => {
     const parsedUrl = new URL(url);
+    const transport = parsedUrl.protocol === 'https:' ? https : http;
+    const defaultPort = parsedUrl.protocol === 'https:' ? 443 : 80;
+    
     const options = {
       hostname: parsedUrl.hostname,
-      port: parsedUrl.port || 80,
+      port: parsedUrl.port || defaultPort,
       path: parsedUrl.pathname + parsedUrl.search,
       method: method,
       headers: {
@@ -19,7 +23,7 @@ function makeRequest(url, method = 'GET', data = null) {
       }
     };
 
-    const req = http.request(options, (res) => {
+    const req = transport.request(options, (res) => {
       let body = '';
       res.on('data', chunk => body += chunk);
       res.on('end', () => {
@@ -66,7 +70,7 @@ async function runAgent() {
   try {
     // Step 1: Verify token with Server
     const verifyRes = await makeRequest(`${SERVER_URL}/api/uninstall/verify?token=${token}`);
-    
+
     if (!verifyRes.success) {
       console.error(`[Agent] Token verification failed: ${verifyRes.message}`);
       process.exit(1);

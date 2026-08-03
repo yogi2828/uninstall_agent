@@ -1,0 +1,15 @@
+{
+  "name": "sysclean-root",
+  "version": "1.0.0",
+  "description": "Root configuration for SysClean Enterprise Server & Desktop Agent",
+  "scripts": {
+    "start": "node server/index.js",
+    "build": "cd server && npm install",
+    "register": "node client-agent/register-protocol.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

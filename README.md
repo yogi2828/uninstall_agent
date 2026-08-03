@@ -54,14 +54,17 @@ npm install
 
 ### Step 2: Register Custom Protocol Handler (`sysclean://`)
 
-To enable email links to automatically launch the Desktop Agent on your machine, register the `sysclean://` URI scheme in Windows Registry:
+To enable email links to automatically launch the Desktop Agent on your machine, navigate into `client-agent` and register the `sysclean://` URI scheme in Windows Registry:
 
 ```bash
-cd ../client-agent
+# Navigate to client-agent directory first
+cd client-agent
+
+# Execute registry registration script
 node register-protocol.js
 ```
 
-> **Note**: This creates registry keys in `HKCU\Software\Classes\sysclean` binding `sysclean://` commands to `agent.js`.
+> ⚠️ **Important Directory Note**: `register-protocol.js` is located inside the `client-agent/` folder. If you run `node register-protocol.js` from the root project directory `D:\New folder\`, Node.js will throw `MODULE_NOT_FOUND`. Always change directory into `client-agent` first (`cd client-agent`).
 
 ### Step 3: Start the Management Server
 

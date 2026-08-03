@@ -2,14 +2,15 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = 'sysclean-enterprise-secret-key-2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'sysclean-enterprise-secret-key-2026';
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static frontend dashboard from public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
 // In-memory data store for demonstration
@@ -46,6 +47,11 @@ const uninstallJobs = [];
 
 // --- REST API ENDPOINTS ---
 
+// Root fallback to serve index.html dashboard
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // 1. Get Devices & Installed Apps
 app.get('/api/devices', (req, res) => {
   res.json({ success: true, devices });
@@ -70,7 +76,7 @@ app.post('/api/uninstall/request', (req, res) => {
       deviceId,
       appId,
       appName: appItem.name,
-      cleanupDepth: cleanupDepth || 'deep', // 'standard' | 'deep' | 'forensic'
+      cleanupDepth: cleanupDepth || 'deep',
       autoPurgeTraces: autoPurgeTraces !== undefined ? autoPurgeTraces : true,
       targetEmail: targetEmail || 'user@company.com'
     },
@@ -79,7 +85,9 @@ app.post('/api/uninstall/request', (req, res) => {
   );
 
   const protocolLink = `sysclean://uninstall?token=${token}`;
-  const webTriggerLink = `http://localhost:${PORT}/api/uninstall/trigger-web?token=${token}`;
+  const host = req.get('host') || `localhost:${PORT}`;
+  const protocol = req.protocol || 'http';
+  const webTriggerLink = `${protocol}://${host}/api/uninstall/trigger-web?token=${token}`;
 
   const newJob = {
     jobId,
@@ -91,7 +99,7 @@ app.post('/api/uninstall/request', (req, res) => {
     targetEmail: targetEmail || 'user@company.com',
     cleanupDepth: cleanupDepth || 'deep',
     autoPurgeTraces: autoPurgeTraces !== undefined ? autoPurgeTraces : true,
-    status: 'Pending', // Pending -> Triggered -> Validated -> Uninstalling -> Cleaning -> Completed / Failed
+    status: 'Pending',
     protocolLink,
     webTriggerLink,
     token,
@@ -131,7 +139,6 @@ app.get('/api/uninstall/trigger-web', (req, res) => {
       });
     }
 
-    // Render HTML page that launches custom protocol handler sysclean:// and offers agent status
     res.send(`
       <!DOCTYPE html>
       <html lang="en">
@@ -159,7 +166,6 @@ app.get('/api/uninstall/trigger-web', (req, res) => {
           <span class="badge">Trace Purge Mode: ${decoded.cleanupDepth.toUpperCase()}</span>
         </div>
         <script>
-          // Attempt automatic launch of custom protocol scheme
           window.location.href = "sysclean://uninstall?token=${token}";
         </script>
       </body>
@@ -227,7 +233,6 @@ app.post('/api/uninstall/report', (req, res) => {
 
     job.logs.push(logEntry);
 
-    // If completed, update installed app list in device catalog to simulate successful uninstallation
     if (status === 'Completed') {
       const device = devices.find(d => d.id === job.deviceId);
       if (device) {

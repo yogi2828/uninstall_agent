@@ -122,14 +122,14 @@ You can deploy the **SysClean Management Server & Web Dashboard** for free on mu
 4. Connect your GitHub repository.
 5. Fill in the build settings:
    - **Name**: `sysclean-management-server`
-   - **Root Directory**: `server`
+   - **Root Directory**: `.` (Leave as repository root)
    - **Runtime**: `Node`
-   - **Build Command**: `npm install`
-   - **Start Command**: `node index.js`
+   - **Build Command**: `npm run build`
+   - **Start Command**: `npm start`
    - **Instance Type**: `Free`
 6. Click **Advanced** and add Environment Variables:
    - `JWT_SECRET` = `your-secure-random-secret-key`
-   - `PORT` = `10000`
+   - `KEEP_ALIVE_URL` = `https://your-render-app-name.onrender.com`
 7. Click **Create Web Service**.
 
 Once deployed, Render will provide a free live URL (e.g. `https://sysclean-server.onrender.com`).

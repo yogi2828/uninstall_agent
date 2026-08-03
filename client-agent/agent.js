@@ -1,7 +1,7 @@
 const http = require('http');
 const TraceCleaner = require('./cleaner');
 
-const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3000';
+const SERVER_URL = process.env.SERVER_URL || 'https://uninstall-agent.onrender.com';
 
 /**
  * Helper to make HTTP JSON requests
